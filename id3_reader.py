@@ -1,10 +1,12 @@
+import logging
+import argparse
 import struct
 import settings
 from id3 import ID3Tag
 
 def read_header_string_into_new_tag(id3_header_string):
 	if id3_header_string[0:3] != 'ID3':
-		print('fart.') # Read up on Pythonic error handling.
+		logging.error('fart.') # Read up on Pythonic error handling.
 		return
 
 	file_identifier, major_version, minor_version, flag = struct.unpack('>3sBBB', id3_header_string)
@@ -30,7 +32,7 @@ def read_frames_into_tag(file_socket, tag):
 
 	frames_body_size = convert_synch_safe_array_into_number(struct.unpack('BBBB', file_socket.read(4)))
 
-	print "Frames body size: %d" % frames_body_size
+	logging.info("Frames body size: %d" % frames_body_size)
 
 	current_position = settings.ID3_FRAMES_START_LOCATION + 4 # TODO: determine this dynamically
 
@@ -51,17 +53,23 @@ def read_frame_into_tag(file_socket, tag):
 		file_socket.read(2)
 
 	if framesize > 0:
-		print "ID: %s Framesize: %s" % (frame_id, framesize)
+		logging.info("ID: %s Framesize: %s" % (frame_id, framesize))
 
 	data = file_socket.read(framesize)
 
 	if framesize > 0:
 		tag.frames[frame_id] = data
 		if len(data) < 100:
-			print "Frame data: %s" % data
+			logging.info("Frame data: %s" % data)
 
 def main():
-	f = open('song2.mp3')
+	logging.getLogger().setLevel(logging.DEBUG)
+
+	parser = argparse.ArgumentParser(description='Reads an ID3 tag and prints out frame information.')
+	parser.add_argument("mp3_file", help="path to MP3 file to parse")
+	args = parser.parse_args()
+
+	f = open(args.mp3_file)
 	tag = create_tag_with_file_socket(f)
 
 	print(tag)

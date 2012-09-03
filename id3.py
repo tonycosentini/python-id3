@@ -6,12 +6,15 @@ class ID3Tag:
 		self.frames = {}
 
 	def __str__(self):
-		description = 'Major version: {self.major_version}\nMinor version: {self.minor_version}\n'.format(self=self)
+		description = '==================================\n'
+		description += 'Major version: {self.major_version}\nMinor version: {self.minor_version}\n'.format(self=self)
+		description += '--Frame Information---------------\n'
 		for frame_id, data in self.frames.iteritems():
 			description += "Frame ID: %s\n" % frame_id
 			if len(data) <= 100:
 				description += "Data: %s" % data
 			else:
 				description += "Data is too large."
-			description += "\n\n"
+			description += "\n"
+		description += '=================================='
 		return description
